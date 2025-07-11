@@ -1,0 +1,1328 @@
+openapi: 3.0.1
+info:
+  description: Swagger for Account and Transaction API Specification
+  version: 1.0.6
+  title: Account and Transaction API Specification for HK Market
+
+paths:
+
+  /aisp/account-consents:
+    post:
+      operationId: consent-setup
+      tags:
+        - Account Consent Setup
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentRequestData'
+      responses:
+        '201':
+          description: Created
+          headers:
+            x-fapi-interaction-id:
+              $ref: '#/components/headers/x-fapi-interaction-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountConsentsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '415':
+          $ref: '#/components/responses/415'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+
+  /aisp/account-consents/{consentId}:
+    get:
+      operationId: consent-retrival
+      tags:
+        - Account Consent Setup
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - in: path
+          description: Consent Id
+          name: consentId
+          required: true
+          schema:
+            type: string
+          example: 7404e99b-1a4d-4b08-b441-c327661527f0
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+
+      responses:
+        '200':
+          description: OK
+          headers:
+            x-fapi-interaction-id:
+              $ref: '#/components/headers/x-fapi-interaction-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountConsentsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+
+    delete:
+      operationId: consent-deletion
+      tags:
+        - Account Consent Setup
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - in: path
+          description: Consent Id
+          name: consentId
+          required: true
+          schema:
+            type: string
+          example: 7404e99b-1a4d-4b08-b441-c327661527f0
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+
+      responses:
+        '204':
+          description: No Content
+          headers:
+            x-fapi-interaction-id:
+              $ref: '#/components/headers/x-fapi-interaction-id'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+  /aisp/accounts:
+    get:
+      operationId: accountStatus
+      tags:
+        - Fulfilment endpoints
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              $ref: '#/components/headers/Content-Type'
+            x-fapi-interaction-id:
+              $ref: '#/components/headers/x-fapi-interaction-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+
+  /aisp/accounts/{accountId}/transactions:
+    get:
+      operationId: transactionsByAccount
+      tags:
+        - Fulfilment endpoints
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - in: path
+          description: Account Id
+          name: accountId
+          required: true
+          schema:
+            type: string
+          example: ThR-RpLMV5lZzDu8vrfEFg
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+        - in: query
+          name: fromDate
+          description: Specifies the start date time for filtering out the transactions date; a blank value will be treated open-ended. Time zone input will be ignored. Date format i.e. 2017-10-22
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: toDate
+          description: Specifies the end date time for filtering out the transactions date; a blank value will be treated as open-ended. Time zone input will be ignored. Date format i.e. 2017-10-22
+          schema:
+            type: string
+            format: date
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountTransactionResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+  /aisp/accounts/{accountId}/balances:
+    get:
+      operationId: balancesByAccount
+      tags:
+        - Fulfilment endpoints
+      security:
+        - bearerAuthSession: []
+      parameters:
+
+        - in: path
+          description: Account Id
+          name: accountId
+          required: true
+          schema:
+            type: string
+          example: ThR-RpLMV5lZzDu8vrfEFg
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+        - in: query
+          name: fromDate
+          schema:
+            type: string
+          description:  Specifies the start date time for filtering out the transactions date; a blank value will be treated open-ended. Time zone input will be ignored. Date format i.e. 2017-10-22
+        - in: query
+          description: Specifies the end date time for filtering out the transactions date; a blank value will be treated as open-ended. Time zone input will be ignored. Date format i.e. 2017-10-22
+          name: toDate
+          required: false
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBalanceResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+  /aisp/accounts/availability:
+    post:
+      operationId: accountAvailability
+      tags:
+        - Fulfilment endpoints
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAvailabilityRequest'
+      responses:
+        '200':
+          description:  OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountAvailabilityResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '415':
+          $ref: '#/components/responses/415'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+  /events:
+    post:
+      operationId: notificationEvent
+      tags:
+        - Notification event endpoints
+      security:
+        - bearerAuthSession: []
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/x-fapi-auth-date'
+        - $ref: '#/components/parameters/x-fapi-customer-ip-address'
+        - $ref: '#/components/parameters/x-fapi-interaction-id'
+        - $ref: '#/components/parameters/Accept-Language'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationEventRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationEventResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '405':
+          $ref: '#/components/responses/405'
+        '406':
+          $ref: '#/components/responses/406'
+        '415':
+          $ref: '#/components/responses/415'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+        '504':
+          $ref: '#/components/responses/504'
+
+servers:
+  - url: 'https://sandbox.ob.business.hsbc.com.hk/mock/open-banking/v1.0'
+    description: AISP Mock Sandbox endpoints
+  - url: 'https://secure.sandbox.ob.business.hsbc.com.hk/open-banking/v1.0'
+    description: AISP Sandbox endpoints
+  - url: 'https://api.ob.business.hsbc.com.hk/open-banking/v1.0'
+    description: AISP Production endpoints
+
+components:
+  schemas:
+
+    NotImplemented:
+      type: object
+      description: Not Implemented
+
+    ConsentRequestData:
+      type: object
+      properties:
+        data:
+          type: object
+          required:
+            - permissions
+            - expirationDate
+          properties:
+            permissions:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExternalPermissionCode'
+              minItems: 1
+            expirationDate:
+              description:
+                'Specified expiration date and time of the permissions.
+                The maximum value is 365 days from current date.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            transactionFromDate:
+              description:
+                'Specified start date and time for the transaction query period.
+                If this is not populated, the start date will be open ended, and data will be returned from the earliest available transaction.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            transactionToDate:
+              description:
+                'Specified end date and time for the transaction query period.
+                If this is not populated, the end date will be open ended, and data will be returned to the latest available transaction.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            balanceFromDate:
+              description:
+                'Specified start date and time for the balance history query period.
+                If this is not populated, the start date will be open ended, and data will be returned from the earliest available balance.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            balanceToDate:
+              description:
+                'Specified end date and time for the balance history query period.
+                If this is not populated, the end date will be open ended, and data will be returned to the latest available balance.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+
+    AccountConsentsResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - consentId
+            - creationDate
+            - status
+            - statusUpdateDate
+            - permissions
+          properties:
+            consentId:
+              description: Unique identification as assigned to identify the account access consent resource.
+              type: string
+              minLength: 1
+              maxLength: 128
+            creationDate:
+              $ref: '#/components/schemas/CreationDateTime'
+            status:
+              $ref: '#/components/schemas/ConsentStatusCode'
+            statusUpdateDate:
+              $ref: '#/components/schemas/StatusUpdateDateTime'
+            permissions:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExternalPermissionCode'
+              minItems: 1
+            expirationDate:
+              description:
+                'Specified expiration date and time of the permissions.
+                The maximum value is 365 days from current date.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            transactionFromDate:
+              description:
+                'Specified start date and time for the transaction query period.
+                If this is not populated, the start date will be open ended, and data will be returned from the earliest available transaction.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            transactionToDate:
+              description:
+                'Specified end date and time for the transaction query period.
+                If this is not populated, the end date will be open ended, and data will be returned to the latest available transaction.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            balanceFromDate:
+              description:
+                'Specified start date and time for the balance history query period.
+                If this is not populated, the start date will be open ended, and data will be returned from the earliest available balance.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+            balanceToDate:
+              description:
+                'Specified end date and time for the balance history query period.
+                If this is not populated, the end date will be open ended, and data will be returned to the latest available balance.All dates in the JSON payloads are represented in ISO 8601 date-time format.
+                All date-time fields in responses must include the timezone.
+                An example is below: 2024-01-17T08:18:27Z'
+              example: "2024-01-17T08:18:27Z"
+              type: string
+              format: date-time
+        links:
+          $ref: '#/components/schemas/Links'
+      additionalProperties: false
+
+    ConsentStatusCode:
+      type: string
+      enum:
+        - PendingAuthorise
+        - Rejected
+        - Authorised
+        - Revoked
+
+    ExternalPermissionCode:
+      type: string
+      enum:
+        - ReadAccountAvailability
+        - ReadAccountStatus
+        - ReadAccountBalance
+        - ReadAccountTransaction
+
+    StatusUpdateDateTime:
+      description:
+        'Date and time at which the resource status was updated. All dates in the JSON payloads are represented in ISO 8601 date-time format.
+        All date-time fields in responses must include the timezone. An example is below: 2017-04-05T00:07:00Z'
+      example: "2017-04-05T00:07:00Z"
+      type: string
+      format: date-time
+
+
+    CreationDateTime:
+      description:
+        'Date and time at which the resource was created. All dates in the JSON payloads are represented in ISO 8601 date-time format.
+        All date-time fields in responses must include the timezone. An example is below: 2017-04-05T00:07:00Z'
+      example: "2017-04-05T00:07:00Z"
+      type: string
+      format: date-time
+
+
+    errorInfo:
+      description: 'An array of detail error codes, and messages, and URLs to documentation to help remediation.'
+      type: object
+      properties:
+
+        id:
+          description: 'A unique reference for the error instance, for audit purposes, in case of unknown/unclassified errors.'
+          type: string
+          minLength: 1
+          maxLength: 40
+        errors:
+          items:
+            $ref: '#/components/schemas/HKError1'
+          type: array
+          minItems: 1
+      required:
+        - code
+        - message
+        - errors
+      additionalProperties: false
+
+    ApiGatewayErrorResponse:
+      description: Error message created by AWS API Gateway
+      type: object
+      properties:
+        message:
+          description: Error message
+          type: string
+
+    ApiGatewayEmptyResponse:
+      description: Error message created by AWS API Gateway
+      type: object
+      example: ''
+
+    HKError1:
+      type: object
+      properties:
+        code:
+          description: 'Low level textual error code, e.g., HK.HKMA.Field.Missing'
+          type: string
+          enum:
+            - OB.Field.Expected
+            - OB.Field.Invalid
+            - OB.Field.InvalidDate
+            - OB.Field.InvalidDateFormat
+            - OB.Field.InvalidDateRange
+            - OB.Field.Missing
+            - OB.Field.Unexpected
+            - OB.Header.Invalid
+            - OB.Header.Missing
+        causes:
+          description: 'A description of the error that occurred.'
+          type: string
+          minLength: 1
+          maxLength: 500
+        extendedDetails:
+          description: 'Provide details for the error'
+          type: object
+          properties:
+            path:
+              description: 'Recommended but optional reference to the JSON Path of the field with error, e.g., Data.Initiation.InstructedAmount.Currency'
+              type: string
+              minLength: 1
+              maxLength: 500
+      required:
+        - code
+        - causes
+      additionalProperties: false
+      minProperties: 1
+
+    AccountResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          properties:
+            account:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountResponseData'
+        links:
+          $ref: '#/components/schemas/Links'
+
+    AccountResponseData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          maxLength: 40
+        accountNumber:
+          type: string
+          maxLength: 256
+        accountType:
+          $ref: '#/components/schemas/AccountTypeCode'
+        accountSubType:
+          $ref: '#/components/schemas/AccountSubTypeCode'
+        productName:
+          type: string
+          maxLength: 60
+        accountStatus:
+          $ref: '#/components/schemas/AccountStatus'
+        currency:
+          $ref: '#/components/schemas/ISOCurrencyCode'
+
+    AccountTypeCode:
+      type: string
+      enum:
+        - Business
+        - Personal
+
+    AccountSubTypeCode:
+      type: string
+      enum:
+        - Savings
+        - Current
+
+    AccountStatus:
+      type: string
+      enum:
+        - Active
+        - Inactive
+        - Unavailable
+        - Retry
+        - Error
+
+    ISOCurrencyCode:
+      type: string
+      format: ISOCurrencyCode
+      pattern: '^[A-Z]{3,3}$'
+      example: HKD
+
+    AccountTransactionResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          properties:
+            transaction:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountTransactionResponseData'
+        links:
+          $ref: '#/components/schemas/Links'
+      additionalProperties: false
+
+    AccountTransactionResponseData:
+      type: object
+      description: Provides further details on an entry in the report.
+      required:
+        - accountId
+        - accountNumber
+        - transactionDescription
+        - transactionDate
+        - creditDebitIndicator
+        - status
+        - amount
+        - currency
+      properties:
+        accountId:
+          $ref: '#/components/schemas/accountId'
+        accountNumber:
+          $ref: '#/components/schemas/accountNumber'
+        transactionId:
+          $ref: '#/components/schemas/transactionId'
+        transactionDescription:
+          $ref: '#/components/schemas/transactionDescription'
+        transactionDate:
+          $ref: '#/components/schemas/date'
+        creditDebitIndicator:
+          $ref: '#/components/schemas/CreditDebitCode'
+        status:
+          $ref: '#/components/schemas/status'
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+
+
+    AccountBalanceResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          properties:
+            account:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountBalanceResponseData'
+              minItems: 1
+        links:
+          $ref: '#/components/schemas/Links'
+      additionalProperties: false
+
+    AccountBalanceResponseData:
+      type: object
+      description: Provides further details on an entry in the report.
+      required:
+        - accountId
+      properties:
+        accountId:
+          $ref: '#/components/schemas/accountId'
+        balance:
+          type: array
+          items:
+            $ref: '#/components/schemas/BalanceData'
+
+
+    Links:
+      type: object
+      description: Links relevant to the payload
+      properties:
+        self:
+          type: string
+          format: uri
+        prev:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+      additionalProperties: false
+      required:
+        - self
+
+    Meta:
+      title: MetaData
+      type: object
+      description: Meta Data relevant to the payload
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+      additionalProperties: false
+
+
+    ISODate:
+      description: YYYY-MM-DD
+      type: string
+      format: date
+
+
+    accountId:
+      type: string
+      description: A unique and immutable identifier used to identify the account resource. This identifier has no meaning to the account owner.
+      minLength: 1
+      maxLength: 40
+    accountNumber:
+      description: Identification assigned by an institution to identify an account. This identification is known by the account owner.
+      type: string
+      minLength: 1
+      maxLength: 256
+    transactionCode:
+      type: string
+    transactionId:
+      type: string
+    transactionDescription:
+      type: string
+    date:
+      description:
+        'All dates in the JSON payloads are represented in ISO 8601 date format.
+        All date-time fields in responses must include the timezone. An example is below: 2023-01-11T00:07:00Z'
+      type: string
+      format: date-time
+    CreditDebitCode:
+      description:
+        'Indicates whether the amount is a credit or a debit.
+          Usage: A zero amount is considered to be a credit amount.'
+      type: string
+      enum:
+        - Credit
+        - Debit
+    status:
+      description: Status of a transaction entry on the books of the account servicer.
+      type: string
+      enum:
+        - Booked
+        - Pending
+    amount:
+      description: A number of monetary units specified in an active currency where the unit of currency is explicit and compliant with ISO 4217.
+      type: string
+      pattern: '^\d{1,13}$|^\d{1,13}\.\d{1,5}$'
+    currency:
+      description: 'A code allocated to a currency by a Maintenance Agency under an international identification scheme, as described in the latest edition of the international standard ISO 4217 "Codes for the representation of currencies and funds".'
+      type: string
+      pattern: '^[A-Z]{3,3}$'
+
+    BalanceData:
+      type: object
+      description: Provides further details on an entry in the report.
+      properties:
+        type:
+          $ref: '#/components/schemas/BalanceTypeCode'
+        creditDebitIndicator:
+          $ref: '#/components/schemas/CreditDebitCode'
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/ISOCurrencyCode'
+        datetime:
+          description:
+            'Specifies the date and time of the account balance.
+            An example is below: 2024-01-17T08:18:27Z'
+          example: "2024-01-17T08:18:27Z"
+          type: string
+          format: date-time
+
+    BalanceTypeCode:
+      type: string
+      description: Specifies the type of account balance
+      enum:
+        - Opening Balance
+        - Available Balance
+        - Current Balance
+        - Day End Ledger Balance
+        - Ledger Balance
+
+    SupportedAlgorithms:
+      type: string
+      enum:
+        - PS256
+
+    AccountAvailabilityRequest:
+      type: object
+      properties:
+        data:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AccountAvailabilityRequestData'
+        shareCompanyName:
+          type: string
+          enum:
+            - Yes
+            - No
+          example: Yes
+    AccountAvailabilityRequestData:
+      type: object
+      required:
+        - paramName
+      properties:
+        paramName:
+          $ref: '#/components/schemas/paramName'
+        paramValue:
+          type: string
+          example: 200123456888
+    
+    paramName:
+      type: string
+      enum:
+        - businessRegistrationCertificate
+        - certificateOfIncorporation
+        - accountNumber
+        - other
+      example: accountNumber
+
+    AccountAvailabilityResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AccountAvailabilityResponseData'
+
+    AccountAvailabilityResponseData:
+      type: object
+      required:
+        - paramName
+        - status
+      properties:
+        paramName:
+          $ref: '#/components/schemas/paramName'
+        status:
+          type: string
+          enum:
+            - Yes
+            - No
+            - Retry
+            - NotAvailable
+            - Error
+          example: Yes
+        companyName:
+          type: string
+          example: Digital Accounts LTD
+
+    NotificationEventRequest:
+      type: object
+      required:
+        - maxEvents
+      properties:
+        ack:
+          type: array
+          description: List of successfully handled "jti".
+          items:
+            type: string
+        returnImmediately:
+          type: boolean
+          description: Indicates whether it should return a response immediately (short polling) or provide a long poll. Value should always be <b>true</b> as only short polling is currently supported.
+        maxEvents:
+          type: integer
+          description: Size limit for the event collection size in the response, null or zero input for the field indicates the bank returned an empty set of outstanding events.
+
+    NotificationEventResponse:
+      type: object
+      required:
+        - sets
+      properties:
+        sets:
+          type: object
+          description: >
+            <div style="padding-right: 75px">
+              JSON object containing zero or more SETs being returned.
+              Each field name is the "jti" of the SET to be delivered (see value), and its value is a Signed JWT representing the corresponding SET.
+              Here is an example of a decoded SET value:
+            </div>
+            <div>
+              <code style="color: black; background-color: transparent; border: 0px; white-space:pre-wrap">
+              HEADER
+              {
+                "kid": "f591d076-2fa1-4400-8c83-ac3b65937e00",
+                "typ": "JWT",
+                "alg": "PS256"
+              }
+              PAYLOAD
+              {
+                "iss": "https://secure.sandbox.ob.business.hsbc.com.hk",
+                "iat": 1717063751,
+                "toe": 1717063747000,
+                "jti": "zpbqiKnezbAnysIqPDhGXjaGOCWhnRtu",
+                "aud": "PFoMa1GDG1365GQlPk7eRcNxoy2Hcohb",
+                "sub": "AccountAccess",
+                "txn": "764334716",
+                "events": {
+                  "urn:hk:openbanking:events:resource-update": {
+                    "subject": {
+                      "subject_type": "openbanking.hk/rid_[openbanking.hk/rty]",
+                      "openbanking.hk/rid": "764334716",
+                      "openbanking.hk/rty": "AccountAccess",
+                      "openbanking.hk/rlk": [
+                        {
+                          "version": "1.0",
+                          "link": "https://secure.sandbox.ob.business.hsbc.com.hk/open-banking/v1.0/aisp/account-consents/764334716"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+              </code>
+            </div>
+            <div style="padding-right: 75px">
+              Where
+              <ul>
+                <li><b>kid</b> is the Key ID of the Public Key to be used to verify the signature of the JWT set.
+                    The URL where the Public Key can be found is declared in the Well Known endpoint under <b>jwks_uri</b> field.</li>
+                <li><b>iss</b> is the issuer of this JWT, in our case the base URL of the environment.</li>
+                <li><b>iat</b> is timestamp of when this JWT was issued, in UTC seconds.</li>
+                <li><b>jti</b> is unique ID of the JWT, max 128 characters.</li>
+                <li><b>aud</b> is the Client ID.</li>
+                <li><b>txn</b> is the Transaction Identifier, a unique ID for the transaction.
+                    ASPSPs may populate this field with the x-fapi-interaction-id of the api operation that lead to the change or
+                    populate it with the same value as jti, or the ID of the updated resource</li>
+                <li><b>toe</b> is the timestamp of Event, in UTC milliseconds (ie. the timestamp when the consent has been revoked).</li>
+                <li><b>openbanking.hk/rid</b> is the ID of the updated resource (ie. the consent ID that was revoked).</li>
+                <li><b>openbanking.hk/rty</b> is the type of the updated resource.</li>
+                <li><b>openbanking.hk/rlk</b> is the links to other available versions of the resource.</li>
+              </ul>
+              If there are no outstanding SETs to be transmitted, the JSON object will be empty. 
+              Note that both SETs being transmitted for the first time and SETs that are being retransmitted after not having been acknowledged are communicated here.
+            </div>
+          example:
+            "zpbqiKnezbAnysIqPDhGXjaGOCWhnRtu": "eyJraWQiOiJmNTkxZDA3Ni0yZmExLTQ0MDAtOGM4My1hYzNiNjU5MzdlMDAiLCJ0eXAiOiJKV1QiLCJhbGciOiJQUzI1NiJ9.eyJpc3MiOiJodHRwczovL3NlY3VyZS5zYW5kYm94Lm9iLmJ1c2luZXNzLmhzYmMuY29tLmhrIiwiaWF0IjoxNzE3MDYzNzUxLCJ0b2UiOjE3MTcwNjM3NDcwMDAsImp0aSI6InpwYnFpS25lemJBbnlzSXFQRGhHWGphR09DV2huUnR1IiwiYXVkIjoiUEZvTWExR0RHMTM2NUdRbFBrN2VSY054b3kySGNvaGIiLCJzdWIiOiJBY2NvdW50QWNjZXNzIiwidHhuIjoiNzY0MzM0NzE2IiwiZXZlbnRzIjp7InVybjpoazpvcGVuYmFua2luZzpldmVudHM6cmVzb3VyY2UtdXBkYXRlIjp7InN1YmplY3QiOnsic3ViamVjdF90eXBlIjoib3BlbmJhbmtpbmcuaGsvcmlkX1tvcGVuYmFua2luZy5oay9ydHldIiwib3BlbmJhbmtpbmcuaGsvcmlkIjoiNzY0MzM0NzE2Iiwib3BlbmJhbmtpbmcuaGsvcnR5IjoiQWNjb3VudEFjY2VzcyIsIm9wZW5iYW5raW5nLmhrL3JsayI6W3sidmVyc2lvbiI6IjEuMCIsImxpbmsiOiJodHRwczovL3NlY3VyZS5zYW5kYm94Lm9iLmJ1c2luZXNzLmhzYmMuY29tLmhrL29wZW4tYmFua2luZy92MS4wL2Fpc3AvYWNjb3VudC1jb25zZW50cy83NjQzMzQ3MTYifV19fX19.dQS7IPLnubSxfEXKzcfAOIrH9M8gp9sLiRB3UQe2Mwl9KWjCIsdLb4y_O313HBKsE5RuZ5fVrfdqs4nujvMkvHcuofSoua0Jdu7UqllF3DVWjslpn40s0FDDC03npOKkbvPTWz8I0kDr7D4UjYgMh-IowOlUfyPIcO_3igZGNSnWDAtWEsQ7mqCR3SOID6nmDqZbtbJrIK5PoX4PcDFk98ROcz3FNYS9ea-kL1EeLcFEUV6OVo-SbOI3Q6-1nQu7b-M7majoIR-FU3TkQCVQDQIrEdsCCyhPB7xGdR33c94DPs0fyatCd6dMLe6o1nMgj7SWfLWXspb2yxPBZwrdLA"
+            "nsVIABaPOIvarjKCNybJFHFlfMIUGIqo": "eyJraWQiOiJmNTkxZDA3Ni0yZmExLTQ0MDAtOGM4My1hYzNiNjU5MzdlMDAiLCJ0eXAiOiJKV1QiLCJhbGciOiJQUzI1NiJ9.eyJpc3MiOiJodHRwczovL3NlY3VyZS5zYW5kYm94Lm9iLmJ1c2luZXNzLmhzYmMuY29tLmhrIiwiaWF0IjoxNzE3MDYzNzUxLCJ0b2UiOjE3MTcwNjM0MjEwMDAsImp0aSI6Im5zVklBQmFQT0l2YXJqS0NOeWJKRkhGbGZNSVVHSXFvIiwiYXVkIjoiUEZvTWExR0RHMTM2NUdRbFBrN2VSY054b3kySGNvaGIiLCJzdWIiOiJBY2NvdW50QWNjZXNzIiwidHhuIjoiNzY0MzM0NzE1IiwiZXZlbnRzIjp7InVybjpoazpvcGVuYmFua2luZzpldmVudHM6cmVzb3VyY2UtdXBkYXRlIjp7InN1YmplY3QiOnsic3ViamVjdF90eXBlIjoib3BlbmJhbmtpbmcuaGsvcmlkX1tvcGVuYmFua2luZy5oay9ydHldIiwib3BlbmJhbmtpbmcuaGsvcmlkIjoiNzY0MzM0NzE1Iiwib3BlbmJhbmtpbmcuaGsvcnR5IjoiQWNjb3VudEFjY2VzcyIsIm9wZW5iYW5raW5nLmhrL3JsayI6W3sidmVyc2lvbiI6IjEuMCIsImxpbmsiOiJodHRwczovL3NlY3VyZS5zYW5kYm94Lm9iLmJ1c2luZXNzLmhzYmMuY29tLmhrL29wZW4tYmFua2luZy92MS4wL2Fpc3AvYWNjb3VudC1jb25zZW50cy83NjQzMzQ3MTUifV19fX19.qoYyhDIKU-89yLm6BU3qXxUnr36tiwU2xCEeId4KAueNjBMPoOfMnm40z7TW_aZu07rRU47YrV5kNr8jdN9qac8QxriBdXcoQoLMqwIADCWgTvcsi5odQEPiYYkF-lRmqCAwhYv0dYVSJg_b4nbLueQ_DogaD4rbvsdmynIrCrGyls546A4vLDj5RFmMSNlbgzPW8EldE0xbpwJ0PVYo4veigrF5Ub6uxycJ2Fml6tAg72lZRD_vrmlAdCgBwEXvL6C4k82hnc2CrT2HVHXsgcIuauTwnnksVLU2NnpjfS0pBj8WXtLrk3-gpSZPGnOf96AeuEcy213hdsj4G_cM9g"
+        moreAvailable:
+          type: boolean
+          description: Indicates if there are more unacknowledged events from the bank in addition to the current response data list.
+
+  parameters:
+    Authorization:
+      in: header
+      name: Authorization
+      description: Standard HTTP header that allows credentials to be provided to the authorisation/resource server. Based on the OAuth 2.0/OIDC framework, this consists of basic or bearer authentication schemes.
+      example: Bearer LbGDbcFVVfE-ngpjj8KaH5wrEfg
+      schema:
+        type: string
+      required: true
+    Content-Type:
+      in: header
+      name: Content-Type
+      description: Standard HTTP header indicating the format of the payload provided in the request. Content-type could be set to application/json.
+      example: application/json
+      schema:
+        type: string
+      required: true
+    Accept-Language:
+      in: header
+      name: Accept-Language
+      description: Standard HTTP header to indicate the natural language set used in the response.
+      schema:
+        type: string
+        enum:
+          - en-HK
+          - zh-HK
+          - zh-CN
+    x-fapi-auth-date:
+      in: header
+      name: x-fapi-auth-date
+      description:
+        'Customer last logged-in time with the TSP application.
+        All dates in the HTTP headers are represented as RFC 7231 Full Dates. An example is below:
+        Sun, 10 Sep 2017 19:43:31 UTC'
+      example: Sun, 10 Sep 2017 19:43:31 UTC
+      schema:
+        type: string
+    x-fapi-customer-ip-address:
+      in: header
+      name: x-fapi-customer-ip-address
+      description: Customer IP address when making a request with the TSP application.
+      schema:
+        type: string
+      example: 169.254.169.254
+    x-fapi-interaction-id:
+      in: header
+      name: x-fapi-interaction-id
+      description: Unique correlation ID to playback response for each request.
+      schema:
+        type: string
+
+    account-id:
+      in: path
+      required: true
+      name: accountId
+      description: Unique Account ID assigned by ASPSP
+      schema:
+        type: string
+
+
+  responses:
+    '400':
+      description: Bad Request
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorInfo'
+    '401':
+      description: Unauthorised
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiGatewayEmptyResponse'
+    '403':
+      description: Forbidden
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiGatewayEmptyResponse'
+    '405':
+      description: Method Not Allowed
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorInfo'
+    '406':
+      description: Not Acceptable
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorInfo'
+    '415':
+      description: Unsupported Media Type
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorInfo'
+    '429':
+      description: Too Many Requests
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+        Retry-After:
+          $ref: '#/components/headers/Retry-After'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiGatewayErrorResponse'
+    '500':
+      description: Internal Server Error
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorInfo'
+    '503':
+      description: Service Unavailable
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiGatewayErrorResponse'
+    '504':
+      description: Gateway Timeout
+      headers:
+        Content-Type:
+          $ref: '#/components/headers/Content-Type'
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/x-fapi-interaction-id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiGatewayErrorResponse'
+
+  headers:
+    Content-Type:
+      description: Standard HTTP header indicating the format of the payload provided in the request. Content-type could be set to application/json.
+      schema:
+        type: string
+    x-fapi-interaction-id:
+      description: Unique correlation ID to playback response for each request.
+      schema:
+        type: string
+    Retry-After:
+      description: Header indicating the time (in seconds) that the TSP could wait before retrying an operation. The bank could consider including this header along with responses with the HTTP status code of 429 (Too Many Requests).
+      schema:
+        type: integer
+
+
+  securitySchemes:
+    apiOAuth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'https://api.hsbc.com/.../...'
+          scopes:
+            -'': ""
+    bearerAuthSession:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description:
+        '**Sample Value**
+        ```
+        eyJraWQiOiI1M2Q4NjFjNC1iZTMwLTQzNDItYmU0ZS05N2RlYzQ5YmZhZTIiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI3YjA1NWY4YS01YmJmLTQxZjgtOTYwMC05MTFjNTgyMzJiNjUiLCJpYXQiOjE1MTU3NjE2NzEsInJlc3BvbnNlVHlwZSI6ImNvZGUiLCJpbnRlbnRUeXBlIjoiYWNjb3VudCIsImNsaWVudElkIjoiNTZkZmM2ZTMtMzQ3Yi00ZWY1LTgzY2EtMDcxMDQxZWIwMDMxIiwicmVkaXJlY3RVcmwiOiJodHRwczovLzEyNy4wLjAuMS9yZWRpcmVjdDEiLCJjdXN0b21lcklwIjoiMTI3LjAuMC4xIiwiYnJhbmRJZCI6ImhzYmMiLCJpbnRlbnRJZCI6ImJhM2I0NzY2LTQyNzktNDhjZC05ZGYzLWIyYmQ1NGJhZmNkNiIsImNsYWltSWQiOiI4YjY5ZmM2Yjc2NGU3YTllNTk2YmI2OWMzMzI5NDYxNzIyM2JhMDE3NTAxNTIyN2E5N2M5YzEyZWUzM2JhNWMwIiwic3RhdGUiOiJzb21lLXN0YXRlLTEyMzQ1Njc4Iiwibm9uY2UiOiJuLTBTNl9XekEyTWoifQ.1nqXILi5L1HcMmppIavgd8S6VVhDNBeF-i0XrGwFxVaAs3NW8BuReMRFEbsPC0p56DnXQ3gvYA-BbJ-ahS0vRiMvrxa3VEtTOswJBtjpLBphfOkUvgIAthB2MFv7dVsZvBs9Kqfqis5MINPjafSXaFh9ZelZyu1G_zaQb6LvcxMce5b1fBtFFV3gLGCE9ScdeSMC08mZqPajeW7mP37wBSp_QMSmxeK89KrmZtIMJmte_FuTw-TQ4dwmP6L6nscRAAoTpEaDItxKAWXFyOQPPo2fxZ-79x-Rr12MkTJzoFJbquAwaGEApLgz0JUtp_L20orgrIh8jcY6e7cEt4qglg
+        ```
+        ---
+        **Decoded**
+         ```
+          Header
+          {
+            "kid": "53d861c4-be30-4342-be4e-97dec49bfae2",
+            "typ": "JWT",
+            "alg": "RS256",
+            "jku": ""https://private.api.open.banking.hsbc.com/.well-known/jwks.json"
+          }
+          Payload
+          {
+             "jti": "7b055f8a-5bbf-41f8-9600-911c58232b65",
+             "iat": "1515761671",
+             "scope": "openid aisp or pisp or cbpii or AIS:  32",
+             "state": "some-state-12345678",
+             "nonce": "n-0S6_WzA2Mj",
+             "iss": "https://private.api.personal.hsbc.co.uk",
+             "aud": "https://channelUI.com",
+             "exp": "1 minute from set time",
+             "brand": "PERSONAL",
+             "country": "UK",
+             "standard": "obie",
+             "consentId": "ba3b4766-4279-48cd-9df3-b2bd54bafcd6",
+             "consentType": "AIS or PIS or CBPII",
+             "customerIp": "91.10.21.5",
+             "tppId": "PL-TST-734519779079",
+             "tppName" : "My Tpp"
+          }
+         ``'
+
+
+
+
+
+
+
+

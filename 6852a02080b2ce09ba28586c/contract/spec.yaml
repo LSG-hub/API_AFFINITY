@@ -1,0 +1,756 @@
+openapi: 3.0.1
+info:
+  title: KYC
+  version: '1.0'
+servers:
+  - url: https://connecttoazure.azure-api.net/kyc
+paths:
+  /api/v2/tables/my8a200gm4qzamc/records:
+    get:
+      tags:
+        - lead
+      summary: lead list
+      description: List of all rows from lead table and response data fields can be filtered based on query params.
+      operationId: lead-db-table-row-list
+      parameters:
+        - name: viewId
+          in: query
+          description: "Allows you to fetch records that are currently visible within a specific view.\n\nViews:\n* vwa7n0gvabzsvv8k - Default view"
+          schema:
+            enum:
+              - vwa7n0gvabzsvv8k
+            type: string
+        - name: fields
+          in: query
+          description: 'Array of field names or comma separated filed names to include in the response objects. In array syntax pass it like `fields[]=field1&fields[]=field2` or alternately `fields=field1,field2`.'
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: 'Comma separated field names to sort rows, rows will sort in ascending order based on provided columns. To sort in descending order provide `-` prefix along with column name, like `-field`. Example : `sort=field1,-field2`'
+          schema:
+            type: string
+        - name: where
+          in: query
+          description: 'This can be used for filtering rows, which accepts complicated where conditions. For more info visit [here](https://docs.nocodb.com/developer-resources/rest-apis#comparison-operators). Example : `where=(field1,eq,value)`'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'The `limit` parameter used for pagination, the response collection size depends on limit value with default value `25` and maximum value `1000`, which can be overridden by environment variables `DB_QUERY_LIMIT_DEFAULT` and `DB_QUERY_LIMIT_MAX` respectively.'
+          schema:
+            minimum: 1.0
+            type: number
+          example: 25
+        - name: shuffle
+          in: query
+          description: 'The `shuffle` parameter used for pagination, the response will be shuffled if it is set to 1.'
+          schema:
+            maximum: 1.0
+            minimum: 0.0
+            type: number
+          example: 0
+        - name: offset
+          in: query
+          description: 'The `offset` parameter used for pagination, the value helps to select collection from a certain index.'
+          schema:
+            minimum: 0.0
+            type: number
+          example: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/leadResponse'
+                  PageInfo:
+                    $ref: '#/components/schemas/Paginated'
+              example:
+                list:
+                  - id: 0
+                    business_name: string
+                    business_email: string
+                    country_code: string
+                    phone_number: string
+                    lead_source: string
+                    message: string
+                    interested_product: string
+                    created_at: string
+                    name: string
+                PageInfo:
+                  pageSize: 0
+                  totalRows: 0
+                  isFirstPage: true
+                  isLastPage: true
+                  page: 0
+    post:
+      tags:
+        - lead
+      summary: lead create
+      description: Insert a new row in table by providing a key value pair object where key refers to the column alias. All the required fields should be included with payload excluding `autoincrement` and column with default value.
+      operationId: lead-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/leadRequest'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/leadRequest'
+            example:
+              business_name: string
+              business_email: string
+              country_code: string
+              phone_number: string
+              lead_source: string
+              message: string
+              interested_product: string
+              name: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/leadResponse'
+              example:
+                id: 0
+                business_name: string
+                business_email: string
+                country_code: string
+                phone_number: string
+                lead_source: string
+                message: string
+                interested_product: string
+                created_at: string
+                name: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                required:
+                  - msg
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: 'BadRequest [Error]: <ERROR MESSAGE>'
+                    x-stoplight:
+                      id: p9mk4oi0hbihm
+              examples:
+                Example 1:
+                  value:
+                    msg: 'BadRequest [Error]: <ERROR MESSAGE>'
+    patch:
+      tags:
+        - lead
+      summary: lead update
+      description: Partial update row in table by providing a key value pair object where key refers to the column alias. You need to only include columns which you want to update.
+      operationId: lead-update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/leadRequest'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/leadRequest'
+            example:
+              business_name: string
+              business_email: string
+              country_code: string
+              phone_number: string
+              lead_source: string
+              message: string
+              interested_product: string
+              name: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { }
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                required:
+                  - msg
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: 'BadRequest [Error]: <ERROR MESSAGE>'
+                    x-stoplight:
+                      id: p9mk4oi0hbihm
+              examples:
+                Example 1:
+                  value:
+                    msg: 'BadRequest [Error]: <ERROR MESSAGE>'
+    delete:
+      tags:
+        - lead
+      summary: lead delete
+      description: Delete a row by using the **primary key** column value.
+      operationId: lead-delete
+      responses:
+        '200':
+          description: OK
+  '/api/v2/tables/my8a200gm4qzamc/records/{recordId}':
+    get:
+      tags:
+        - lead
+      summary: lead read
+      description: Read a row data by using the **primary key** column value.
+      operationId: lead-read
+      parameters:
+        - name: recordId
+          in: path
+          description: Primary key of the record you want to read. If the table have composite primary key then combine them by using `___` and pass it as primary key.
+          required: true
+          schema:
+            type: string
+          example: 1
+        - name: fields
+          in: query
+          description: 'Array of field names or comma separated filed names to include in the response objects. In array syntax pass it like `fields[]=field1&fields[]=field2` or alternately `fields=field1,field2`.'
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/leadResponse'
+              example:
+                id: 0
+                business_name: string
+                business_email: string
+                country_code: string
+                phone_number: string
+                lead_source: string
+                message: string
+                interested_product: string
+                created_at: string
+                name: string
+  /api/v2/tables/my8a200gm4qzamc/records/count:
+    get:
+      tags:
+        - lead
+      summary: lead count
+      description: Get rows count of a table by applying optional filters.
+      operationId: lead-count
+      parameters:
+        - name: viewId
+          in: query
+          description: "Allows you to fetch records that are currently visible within a specific view.\n\nViews:\n* vwa7n0gvabzsvv8k - Default view"
+          schema:
+            enum:
+              - vwa7n0gvabzsvv8k
+            type: string
+        - name: where
+          in: query
+          description: 'This can be used for filtering rows, which accepts complicated where conditions. For more info visit [here](https://docs.nocodb.com/developer-resources/rest-apis#comparison-operators). Example : `where=(field1,eq,value)`'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                required:
+                  - list
+                  - pageInfo
+                type: object
+                properties:
+                  count:
+                    type: number
+              examples:
+                Example 1:
+                  value:
+                    count: 3
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                required:
+                  - msg
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: 'BadRequest [Error]: <ERROR MESSAGE>'
+                    x-stoplight:
+                      id: p9mk4oi0hbihm
+              examples:
+                Example 1:
+                  value:
+                    msg: 'BadRequest [Error]: <ERROR MESSAGE>'
+  /api/v2/tables/m1l7hrs755ydogw/records:
+    get:
+      tags:
+        - KYC
+      summary: KYC list
+      description: List of all rows from KYC table and response data fields can be filtered based on query params.
+      operationId: kyc-db-table-row-list
+      parameters:
+        - name: viewId
+          in: query
+          description: "Allows you to fetch records that are currently visible within a specific view.\n\nViews:\n* vwc2qwl6zu905wpn - Default view\n* vwveoj3snlmbewd3 - pending_kyc\n* vwfw77xh3n0he11y - failed_kyc"
+          schema:
+            enum:
+              - vwc2qwl6zu905wpn
+              - vwveoj3snlmbewd3
+              - vwfw77xh3n0he11y
+            type: string
+        - name: fields
+          in: query
+          description: 'Array of field names or comma separated filed names to include in the response objects. In array syntax pass it like `fields[]=field1&fields[]=field2` or alternately `fields=field1,field2`.'
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: 'Comma separated field names to sort rows, rows will sort in ascending order based on provided columns. To sort in descending order provide `-` prefix along with column name, like `-field`. Example : `sort=field1,-field2`'
+          schema:
+            type: string
+        - name: where
+          in: query
+          description: 'This can be used for filtering rows, which accepts complicated where conditions. For more info visit [here](https://docs.nocodb.com/developer-resources/rest-apis#comparison-operators). Example : `where=(field1,eq,value)`'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'The `limit` parameter used for pagination, the response collection size depends on limit value with default value `25` and maximum value `1000`, which can be overridden by environment variables `DB_QUERY_LIMIT_DEFAULT` and `DB_QUERY_LIMIT_MAX` respectively.'
+          schema:
+            minimum: 1.0
+            type: number
+          example: 25
+        - name: shuffle
+          in: query
+          description: 'The `shuffle` parameter used for pagination, the response will be shuffled if it is set to 1.'
+          schema:
+            maximum: 1.0
+            minimum: 0.0
+            type: number
+          example: 0
+        - name: offset
+          in: query
+          description: 'The `offset` parameter used for pagination, the value helps to select collection from a certain index.'
+          schema:
+            minimum: 0.0
+            type: number
+          example: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KYCResponse'
+                  PageInfo:
+                    $ref: '#/components/schemas/Paginated'
+              example:
+                list:
+                  - Id: 0
+                    customer_email: string
+                    status: string
+                    assignee: string
+                    notes: string
+                PageInfo:
+                  pageSize: 0
+                  totalRows: 0
+                  isFirstPage: true
+                  isLastPage: true
+                  page: 0
+    post:
+      tags:
+        - KYC
+      summary: KYC create
+      description: Insert a new row in table by providing a key value pair object where key refers to the column alias. All the required fields should be included with payload excluding `autoincrement` and column with default value.
+      operationId: kyc-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/KYCRequest'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/KYCRequest'
+            example:
+              customer_email: string
+              status: string
+              assignee: string
+              notes: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KYCResponse'
+              example:
+                Id: 0
+                customer_email: string
+                status: string
+                assignee: string
+                notes: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                required:
+                  - msg
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: 'BadRequest [Error]: <ERROR MESSAGE>'
+                    x-stoplight:
+                      id: p9mk4oi0hbihm
+              examples:
+                Example 1:
+                  value:
+                    msg: 'BadRequest [Error]: <ERROR MESSAGE>'
+    patch:
+      tags:
+        - KYC
+      summary: KYC update
+      description: Partial update row in table by providing a key value pair object where key refers to the column alias. You need to only include columns which you want to update.
+      operationId: kyc-update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/KYCRequest'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/KYCRequest'
+            example:
+              customer_email: string
+              status: string
+              assignee: string
+              notes: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { }
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                required:
+                  - msg
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: 'BadRequest [Error]: <ERROR MESSAGE>'
+                    x-stoplight:
+                      id: p9mk4oi0hbihm
+              examples:
+                Example 1:
+                  value:
+                    msg: 'BadRequest [Error]: <ERROR MESSAGE>'
+    delete:
+      tags:
+        - KYC
+      summary: KYC delete
+      description: Delete a row by using the **primary key** column value.
+      operationId: kyc-delete
+      responses:
+        '200':
+          description: OK
+  '/api/v2/tables/m1l7hrs755ydogw/records/{recordId}':
+    get:
+      tags:
+        - KYC
+      summary: KYC read
+      description: Read a row data by using the **primary key** column value.
+      operationId: kyc-read
+      parameters:
+        - name: recordId
+          in: path
+          description: Primary key of the record you want to read. If the table have composite primary key then combine them by using `___` and pass it as primary key.
+          required: true
+          schema:
+            type: string
+          example: 1
+        - name: fields
+          in: query
+          description: 'Array of field names or comma separated filed names to include in the response objects. In array syntax pass it like `fields[]=field1&fields[]=field2` or alternately `fields=field1,field2`.'
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KYCResponse'
+              example:
+                Id: 0
+                customer_email: string
+                status: string
+                assignee: string
+                notes: string
+  /api/v2/tables/m1l7hrs755ydogw/records/count:
+    get:
+      tags:
+        - KYC
+      summary: KYC count
+      description: Get rows count of a table by applying optional filters.
+      operationId: kyc-count
+      parameters:
+        - name: viewId
+          in: query
+          description: "Allows you to fetch records that are currently visible within a specific view.\n\nViews:\n* vwc2qwl6zu905wpn - Default view\n* vwveoj3snlmbewd3 - pending_kyc\n* vwfw77xh3n0he11y - failed_kyc"
+          schema:
+            enum:
+              - vwc2qwl6zu905wpn
+              - vwveoj3snlmbewd3
+              - vwfw77xh3n0he11y
+            type: string
+        - name: where
+          in: query
+          description: 'This can be used for filtering rows, which accepts complicated where conditions. For more info visit [here](https://docs.nocodb.com/developer-resources/rest-apis#comparison-operators). Example : `where=(field1,eq,value)`'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                required:
+                  - list
+                  - pageInfo
+                type: object
+                properties:
+                  count:
+                    type: number
+              examples:
+                Example 1:
+                  value:
+                    count: 3
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                required:
+                  - msg
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: 'BadRequest [Error]: <ERROR MESSAGE>'
+                    x-stoplight:
+                      id: p9mk4oi0hbihm
+              examples:
+                Example 1:
+                  value:
+                    msg: 'BadRequest [Error]: <ERROR MESSAGE>'
+components:
+  schemas:
+    Paginated:
+      title: Paginated
+      type: object
+      properties:
+        pageSize:
+          type: integer
+        totalRows:
+          type: integer
+        isFirstPage:
+          type: boolean
+        isLastPage:
+          type: boolean
+        page:
+          type: number
+    Attachment:
+      title: Attachment
+      type: object
+      properties:
+        mimetype:
+          type: string
+        size:
+          type: integer
+        title:
+          type: string
+        url:
+          type: string
+        icon:
+          type: string
+    Groupby:
+      title: Groupby
+      type: object
+      properties:
+        count:
+          type: number
+          description: count
+        column_name:
+          type: string
+          description: the value of the given column
+    leadResponse:
+      title: lead Response
+      type: object
+      properties:
+        id:
+          type: integer
+        business_name:
+          type: string
+        business_email:
+          type: string
+        country_code:
+          type: string
+        phone_number:
+          type: string
+        lead_source:
+          type: string
+        message:
+          type: string
+        interested_product:
+          type: string
+        created_at:
+          type: string
+        name:
+          type: string
+      description: ''
+      x-internal: false
+    leadRequest:
+      title: lead Request
+      type: object
+      properties:
+        business_name:
+          type: string
+        business_email:
+          type: string
+        country_code:
+          type: string
+        phone_number:
+          type: string
+        lead_source:
+          type: string
+        message:
+          type: string
+        interested_product:
+          type: string
+        name:
+          type: string
+      description: ''
+      x-internal: false
+    leadIdRequest:
+      title: lead Id Request
+      type: object
+      properties:
+        id:
+          type: integer
+      description: ''
+      x-internal: false
+    mdl_one_time_passwordResponse:
+      title: mdl_one_time_password Response
+      type: object
+      properties:
+        id:
+          type: integer
+        phone:
+          type: integer
+        email:
+          type: string
+        otp:
+          type: string
+      description: ''
+      x-internal: false
+    mdl_one_time_passwordRequest:
+      title: mdl_one_time_password Request
+      type: object
+      properties:
+        phone:
+          type: integer
+        email:
+          type: string
+        otp:
+          type: string
+      description: ''
+      x-internal: false
+    mdl_one_time_passwordIdRequest:
+      title: mdl_one_time_password Id Request
+      type: object
+      properties:
+        id:
+          type: integer
+      description: ''
+      x-internal: false
+    KYCResponse:
+      title: KYC Response
+      type: object
+      properties:
+        Id:
+          type: integer
+        customer_email:
+          type: string
+        status:
+          type: string
+        assignee:
+          type: string
+        notes:
+          type: string
+      description: ''
+      x-internal: false
+    KYCRequest:
+      title: KYC Request
+      type: object
+      properties:
+        customer_email:
+          type: string
+        status:
+          type: string
+        assignee:
+          type: string
+        notes:
+          type: string
+      description: ''
+      x-internal: false
+    KYCIdRequest:
+      title: KYC Id Request
+      type: object
+      properties:
+        Id:
+          type: integer
+      description: ''
+      x-internal: false
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: subscription-key
+      in: query
+security:
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]
