@@ -1,0 +1,754 @@
+openapi: 3.0.3
+info:
+  title: Social Media Platform API
+  description: Comprehensive social networking and content sharing platform API
+  version: 4.0.0
+  contact:
+    name: Social Platform Team
+    email: developers@socialmedia.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api.socialmedia.com/v4
+    description: Production API
+  - url: https://staging-api.socialmedia.com/v4
+    description: Staging environment
+
+paths:
+  /posts:
+    get:
+      summary: Get timeline posts
+      description: Retrieve posts from user's timeline or public feed
+      operationId: getTimelinePosts
+      tags:
+        - Posts
+      security:
+        - oauth2: [read:posts]
+      parameters:
+        - name: timeline
+          in: query
+          description: Timeline type to retrieve
+          schema:
+            $ref: '#/components/schemas/TimelineType'
+        - name: limit
+          in: query
+          description: Maximum number of posts to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of posts to skip for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: since
+          in: query
+          description: Return posts created after this date
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Timeline posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+    post:
+      summary: Create new post
+      description: Create a new post with text, images, or video content
+      operationId: createPost
+      tags:
+        - Posts
+      security:
+        - oauth2: [write:posts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreatePostWithMedia'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Invalid post data
+        '413':
+          description: Content too large
+
+  /posts/{postId}:
+    get:
+      summary: Get specific post
+      description: Retrieve details of a specific post by ID
+      operationId: getPost
+      tags:
+        - Posts
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: Unique post identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Post details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+    delete:
+      summary: Delete post
+      description: Delete a post (only by post owner or admin)
+      operationId: deletePost
+      tags:
+        - Posts
+      security:
+        - oauth2: [write:posts]
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post deleted successfully
+        '403':
+          description: Not authorized to delete this post
+        '404':
+          description: Post not found
+
+  /posts/{postId}/comments:
+    get:
+      summary: Get post comments
+      description: Retrieve all comments for a specific post
+      operationId: getPostComments
+      tags:
+        - Comments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: sortBy
+          in: query
+          description: Sort comments by criteria
+          schema:
+            $ref: '#/components/schemas/CommentSortOrder'
+      responses:
+        '200':
+          description: Post comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      summary: Add comment to post
+      description: Add a new comment to a specific post
+      operationId: addComment
+      tags:
+        - Comments
+      security:
+        - oauth2: [write:comments]
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComment'
+      responses:
+        '201':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '404':
+          description: Post not found
+
+  /users/{username}:
+    get:
+      summary: Get user profile
+      description: Retrieve public profile information for a user
+      operationId: getUserProfile
+      tags:
+        - Users
+      parameters:
+        - name: username
+          in: path
+          required: true
+          description: Username or user handle
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_]{3,30}$'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '404':
+          description: User not found
+
+  /users/{username}/follow:
+    post:
+      summary: Follow user
+      description: Start following another user
+      operationId: followUser
+      tags:
+        - Social
+      security:
+        - oauth2: [write:follows]
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successfully started following user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowResponse'
+        '409':
+          description: Already following this user
+    delete:
+      summary: Unfollow user
+      description: Stop following a user
+      operationId: unfollowUser
+      tags:
+        - Social
+      security:
+        - oauth2: [write:follows]
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successfully unfollowed user
+        '404':
+          description: Not following this user
+
+  /messages:
+    get:
+      summary: Get direct messages
+      description: Retrieve direct messages for the authenticated user
+      operationId: getDirectMessages
+      tags:
+        - Messages
+      security:
+        - oauth2: [read:messages]
+      parameters:
+        - name: conversationId
+          in: query
+          description: Filter messages by conversation
+          schema:
+            type: string
+            format: uuid
+        - name: unreadOnly
+          in: query
+          description: Return only unread messages
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Direct messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectMessage'
+    post:
+      summary: Send direct message
+      description: Send a private message to another user
+      operationId: sendDirectMessage
+      tags:
+        - Messages
+      security:
+        - oauth2: [write:messages]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessage'
+      responses:
+        '201':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectMessage'
+        '404':
+          description: Recipient not found
+
+  /notifications:
+    get:
+      summary: Get notifications
+      description: Retrieve notifications for the authenticated user
+      operationId: getNotifications
+      tags:
+        - Notifications
+      security:
+        - oauth2: [read:notifications]
+      parameters:
+        - name: type
+          in: query
+          description: Filter by notification type
+          schema:
+            $ref: '#/components/schemas/NotificationType'
+        - name: unreadOnly
+          in: query
+          description: Return only unread notifications
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: User notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.socialmedia.com/oauth/authorize
+          tokenUrl: https://auth.socialmedia.com/oauth/token
+          scopes:
+            read:posts: Read posts and timeline
+            write:posts: Create and delete posts
+            read:comments: Read comments
+            write:comments: Create and delete comments
+            write:follows: Follow and unfollow users
+            read:messages: Read direct messages
+            write:messages: Send direct messages
+            read:notifications: Read notifications
+
+  schemas:
+    TimelineType:
+      type: string
+      enum:
+        - home
+        - public
+        - trending
+
+    Post:
+      type: object
+      required:
+        - id
+        - authorId
+        - content
+        - createdAt
+        - visibility
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        content:
+          type: string
+          maxLength: 500
+          description: Text content of the post
+        mediaAttachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaAttachment'
+        hashtags:
+          type: array
+          items:
+            type: string
+          description: Hashtags mentioned in the post
+        mentions:
+          type: array
+          items:
+            type: string
+          description: Users mentioned in the post
+        visibility:
+          $ref: '#/components/schemas/PostVisibility'
+        likeCount:
+          type: integer
+          minimum: 0
+        commentCount:
+          type: integer
+          minimum: 0
+        shareCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        editedAt:
+          type: string
+          format: date-time
+        location:
+          $ref: '#/components/schemas/Location'
+
+    CreatePost:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          maxLength: 500
+          minLength: 1
+        visibility:
+          $ref: '#/components/schemas/PostVisibility'
+        location:
+          $ref: '#/components/schemas/Location'
+        scheduledAt:
+          type: string
+          format: date-time
+          description: Schedule post for future publication
+
+    CreatePostWithMedia:
+      allOf:
+        - $ref: '#/components/schemas/CreatePost'
+        - type: object
+          properties:
+            mediaFiles:
+              type: array
+              items:
+                type: string
+                format: binary
+              maxItems: 10
+
+    PostVisibility:
+      type: string
+      enum:
+        - public
+        - followers
+        - private
+
+    PostsResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        hasMore:
+          type: boolean
+
+    Comment:
+      type: object
+      required:
+        - id
+        - postId
+        - authorId
+        - content
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        postId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        content:
+          type: string
+          maxLength: 250
+        parentCommentId:
+          type: string
+          format: uuid
+          description: ID of parent comment for replies
+        likeCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        editedAt:
+          type: string
+          format: date-time
+
+    CreateComment:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          maxLength: 250
+          minLength: 1
+        parentCommentId:
+          type: string
+          format: uuid
+
+    CommentSortOrder:
+      type: string
+      enum:
+        - newest
+        - oldest
+        - popular
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - username
+        - displayName
+        - joinedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        displayName:
+          type: string
+        bio:
+          type: string
+          maxLength: 160
+        profilePictureUrl:
+          type: string
+          format: uri
+        bannerImageUrl:
+          type: string
+          format: uri
+        followerCount:
+          type: integer
+          minimum: 0
+        followingCount:
+          type: integer
+          minimum: 0
+        postCount:
+          type: integer
+          minimum: 0
+        verified:
+          type: boolean
+          default: false
+        joinedAt:
+          type: string
+          format: date-time
+        website:
+          type: string
+          format: uri
+        location:
+          type: string
+
+    FollowResponse:
+      type: object
+      properties:
+        following:
+          type: boolean
+        followedAt:
+          type: string
+          format: date-time
+
+    DirectMessage:
+      type: object
+      required:
+        - id
+        - conversationId
+        - senderId
+        - recipientId
+        - content
+        - sentAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        recipientId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          maxLength: 1000
+        mediaAttachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaAttachment'
+        readAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          format: date-time
+
+    SendMessage:
+      type: object
+      required:
+        - recipientId
+        - content
+      properties:
+        recipientId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          maxLength: 1000
+          minLength: 1
+
+    Notification:
+      type: object
+      required:
+        - id
+        - type
+        - message
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/NotificationType'
+        message:
+          type: string
+        relatedUserId:
+          type: string
+          format: uuid
+        relatedPostId:
+          type: string
+          format: uuid
+        readAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    NotificationType:
+      type: string
+      enum:
+        - like
+        - comment
+        - follow
+        - mention
+        - direct_message
+        - share
+
+    MediaAttachment:
+      type: object
+      required:
+        - id
+        - type
+        - url
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/MediaType'
+        url:
+          type: string
+          format: uri
+        thumbnailUrl:
+          type: string
+          format: uri
+        altText:
+          type: string
+          description: Alternative text for accessibility
+        dimensions:
+          $ref: '#/components/schemas/MediaDimensions'
+
+    MediaType:
+      type: string
+      enum:
+        - image
+        - video
+        - gif
+        - audio
+
+    MediaDimensions:
+      type: object
+      properties:
+        width:
+          type: integer
+          minimum: 1
+        height:
+          type: integer
+          minimum: 1
+
+    Location:
+      type: object
+      properties:
+        name:
+          type: string
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+
+    Pagination:
+      type: object
+      properties:
+        offset:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0

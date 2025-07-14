@@ -576,8 +576,11 @@ class GraphSimilarityAnalyzer:
         self.gnn = LightweightGNN(input_dim=50, hidden_dim=32, output_dim=16)
         self.feature_standardizer = StandardScaler()
         
-    def analyze_graph_similarity(self, api1_path, api2_path):
+    def analyze_graph_similarity(self, api1_path, api2_path, weights=None):
         """Analyze similarity between two APIs using graph neural networks."""
+        if weights is None:
+            weights = {'gnn': 0.7, 'structural': 0.3}
+
         # Load API specifications
         extractor = APIStructureExtractor()
         spec1 = extractor.load_api_spec(api1_path)
@@ -601,14 +604,15 @@ class GraphSimilarityAnalyzer:
         structural_similarity = self._calculate_structural_similarity(graph1, graph2)
         
         # Combine similarities
-        final_score = (similarity_score + structural_similarity) / 2.0
+        final_score = (weights['gnn'] * similarity_score + weights['structural'] * structural_similarity)
         
         return {
             'final_score': final_score * 100,
             'gnn_embedding_similarity': similarity_score * 100,
             'structural_similarity': structural_similarity * 100,
             'graph1_stats': self._get_graph_stats(graph1),
-            'graph2_stats': self._get_graph_stats(graph2)
+            'graph2_stats': self._get_graph_stats(graph2),
+            'weights': weights
         }
     
     def _extract_graph_embedding(self, graph):
@@ -763,6 +767,33 @@ class GraphSimilarityAnalyzer:
             'node_types': dict(node_types)
         }
 
+class HyperparameterTuner:
+    """Tune weights for combining similarity scores."""
+    
+    def __init__(self, analyzer):
+        self.analyzer = analyzer
+    
+    def tune_weights(self, api1_path, api2_path, weight_range):
+        """
+        Tune the weights for GNN and structural similarity.
+        weight_range: A list of weights to try for the GNN similarity.
+        """
+        results = []
+        
+        # To avoid re-calculating embeddings every time, we can do it once.
+        # For simplicity in this implementation, we call the full analysis function.
+        # A more optimized version would separate embedding generation from scoring.
+        
+        for w_gnn in weight_range:
+            w_struct = 1.0 - w_gnn
+            weights = {'gnn': w_gnn, 'structural': round(w_struct,2)}
+            
+            result = self.analyzer.analyze_graph_similarity(api1_path, api2_path, weights=weights)
+            if result:
+                results.append(result)
+        
+        return results
+
 def format_graph_similarity_report(result, api1_name, api2_name):
     """Format the graph similarity analysis result."""
     if not result:
@@ -871,7 +902,7 @@ def format_graph_similarity_report(result, api1_name, api2_name):
 
 ## Summary
 Based on advanced Graph Neural Network analysis with comprehensive graph representation,
-these APIs show **{category.lower()}** with a composite score of **{final_score:.1f}%**.
+these APIs show **{category.lower()}** with a composite score of **{final_score:.1f}**%.
 
 The v4 analyzer provides state-of-the-art similarity analysis through:
 - Complete API-to-graph conversion with rich features
@@ -888,31 +919,102 @@ The v4 analyzer provides state-of-the-art similarity analysis through:
     
     return report
 
+def format_tuning_report(tuning_results, api1_name, api2_name):
+    """Format the hyperparameter tuning results."""
+    if not tuning_results:
+        return "Error: No tuning results to report."
+
+    report = f"""
+# Hyperparameter Tuning Report for Similarity Weights (v4)
+
+## APIs Compared
+- **Source API**: {Path(api1_name).stem}
+- **Target API**: {Path(api2_name).stem}
+
+## Tuning Analysis
+This analysis explores how different weightings for GNN Embedding Similarity and Structural Graph Similarity affect the final composite similarity score. A range of weights were tested to understand the sensitivity of the final score to these two components.
+
+### Comparison of Results
+
+| GNN Weight | Structural Weight | GNN Similarity | Structural Similarity | Final Score |
+|------------|-------------------|----------------|-----------------------|-------------|
+"""
+    # from the results, get gnn and structural similarity. They are the same across runs.
+    gnn_sim = tuning_results[0]['gnn_embedding_similarity']
+    struct_sim = tuning_results[0]['structural_similarity']
+
+    for result in sorted(tuning_results, key=lambda x: x['weights']['gnn']):
+        weights = result['weights']
+        final_score = result['final_score']
+        report += f"| {weights['gnn']:.2f}       | {weights['structural']:.2f}         | {gnn_sim:.1f}%         | {struct_sim:.1f}%             | {final_score:.1f}%      |\n"
+
+    report += """
+## Analysis Summary
+
+The table above shows that the final similarity score is sensitive to the weights assigned to the GNN and structural components. 
+
+- A higher weight on **GNN Embedding Similarity** emphasizes deep structural and semantic patterns learned by the neural network.
+- A higher weight on **Structural Graph Similarity** emphasizes high-level graph metrics like node/edge counts and density.
+
+The choice of weights depends on the desired focus of the similarity analysis. For a balanced view, equal weights (0.5/0.5) are recommended. If the goal is to find APIs with similar underlying functionality regardless of size, a higher GNN weight may be preferable.
+
+---
+*Analysis performed using state-of-the-art Graph Neural Network framework v4*
+"""
+    return report
+
 def main():
     """Main function to run the Graph Neural Network API similarity analysis."""
     import sys
     
-    if len(sys.argv) != 3:
-        print("Usage: python api_similarity_analyzer_v4.py <api1_path> <api2_path>")
+    if len(sys.argv) < 3:
+        print("Usage: python api_similarity_analyzer_v4.py <api1_path> <api2_path> [--tune]")
         sys.exit(1)
     
     api1_path = sys.argv[1]
     api2_path = sys.argv[2]
-    
+    tune = '--tune' in sys.argv
+
     analyzer = GraphSimilarityAnalyzer()
-    result = analyzer.analyze_graph_similarity(api1_path, api2_path)
-    
-    if result:
-        report = format_graph_similarity_report(result, api1_path, api2_path)
-        print(report)
+
+    if tune:
+        tuner = HyperparameterTuner(analyzer)
+        # The user requested tuning weights in a range of '+/- 5', which is ambiguous
+        # for combining scores. We will proceed with a standard approach of tuning
+        # the weights for GNN and structural similarity between 0.0 and 1.0.
+        weight_range = np.linspace(0.0, 1.0, 11) # 11 steps from 0.0 to 1.0
         
-        # Save report to file
-        output_file = "api_similarity_report_v4.md"
-        with open(output_file, 'w') as f:
-            f.write(report)
-        print(f"\nGraph Neural Network analysis report saved to: {output_file}")
+        print("Starting hyperparameter tuning for similarity weights...")
+        tuning_results = tuner.tune_weights(api1_path, api2_path, weight_range)
+        print("Hyperparameter tuning finished.")
+        
+        if tuning_results:
+            # Append tuning report to the main report file
+            tuning_report = format_tuning_report(tuning_results, api1_path, api2_path)
+            print(tuning_report)
+            
+            output_file = "api_similarity_report_v4.md"
+            try:
+                with open(output_file, 'a') as f: # Append mode
+                    f.write("\n\n" + tuning_report)
+                print(f"\nHyperparameter tuning report appended to: {output_file}")
+            except IOError as e:
+                print(f"Error writing to file {output_file}: {e}")
+
     else:
-        print("Error: Could not analyze the provided API specifications.")
+        result = analyzer.analyze_graph_similarity(api1_path, api2_path)
+        
+        if result:
+            report = format_graph_similarity_report(result, api1_path, api2_path)
+            print(report)
+            
+            # Save report to file
+            output_file = "api_similarity_report_v4.md"
+            with open(output_file, 'w') as f:
+                f.write(report)
+            print(f"\nGraph Neural Network analysis report saved to: {output_file}")
+        else:
+            print("Error: Could not analyze the provided API specifications.")
 
 if __name__ == "__main__":
     main()

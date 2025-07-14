@@ -1,0 +1,528 @@
+openapi: 3.0.3
+info:
+  title: Online Store API
+  description: Comprehensive online retail platform API for digital commerce
+  version: 1.5.2
+  contact:
+    name: Store API Team
+    email: api@onlinestore.com
+servers:
+  - url: https://store-api.retail.com/v1
+    description: Main server
+  - url: https://dev-store-api.retail.com/v1
+    description: Development server
+
+paths:
+  /items:
+    get:
+      summary: Retrieve product catalog
+      description: Get a list of all available items in the store
+      operationId: getItems
+      tags:
+        - Catalog
+      parameters:
+        - name: pageNumber
+          in: query
+          description: Page number for results pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: categoryFilter
+          in: query
+          description: Filter items by category type
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Items retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemsList'
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Server error
+    post:
+      summary: Add new item
+      description: Create a new item in the catalog
+      operationId: addItem
+      tags:
+        - Catalog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewItem'
+      responses:
+        '201':
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Invalid item data
+        '403':
+          description: Forbidden
+
+  /items/{itemId}:
+    get:
+      summary: Get item details
+      description: Retrieve comprehensive information about a specific item
+      operationId: getItemDetails
+      tags:
+        - Catalog
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: Item unique identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Item details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found
+    put:
+      summary: Update item information
+      description: Modify an existing item's details
+      operationId: updateItemDetails
+      tags:
+        - Catalog
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewItem'
+      responses:
+        '200':
+          description: Item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found
+    delete:
+      summary: Remove item
+      description: Delete an item from the catalog
+      operationId: removeItem
+      tags:
+        - Catalog
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Item removed successfully
+        '404':
+          description: Item not found
+
+  /purchases:
+    get:
+      summary: Get purchase history
+      description: Retrieve all purchases for the current user
+      operationId: getPurchases
+      tags:
+        - Shopping
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: orderStatus
+          in: query
+          description: Filter by purchase status
+          schema:
+            $ref: '#/components/schemas/PurchaseStatus'
+      responses:
+        '200':
+          description: Purchase history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Purchase'
+        '401':
+          description: Authentication required
+    post:
+      summary: Create purchase order
+      description: Submit a new purchase order
+      operationId: createPurchase
+      tags:
+        - Shopping
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPurchase'
+      responses:
+        '201':
+          description: Purchase order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        '400':
+          description: Invalid purchase data
+
+  /purchases/{purchaseId}:
+    get:
+      summary: Get purchase details
+      description: Retrieve detailed information about a specific purchase
+      operationId: getPurchaseDetails
+      tags:
+        - Shopping
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: purchaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Purchase details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        '404':
+          description: Purchase not found
+
+  /users/{userId}:
+    get:
+      summary: Get user information
+      description: Retrieve user account details
+      operationId: getUserInfo
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    Item:
+      type: object
+      required:
+        - id
+        - title
+        - cost
+        - category
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Item unique identifier
+        title:
+          type: string
+          description: Item title
+          minLength: 1
+          maxLength: 200
+        details:
+          type: string
+          description: Item detailed description
+        cost:
+          type: number
+          format: float
+          minimum: 0
+          description: Item cost in USD
+        category:
+          type: string
+          description: Item category
+        manufacturer:
+          type: string
+          description: Item manufacturer
+        itemCode:
+          type: string
+          description: Item code for inventory
+        stockLevel:
+          type: integer
+          minimum: 0
+          description: Current stock level
+        photos:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Item photo URLs
+        keywords:
+          type: array
+          items:
+            type: string
+          description: Search keywords
+        dateAdded:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          format: date-time
+
+    NewItem:
+      type: object
+      required:
+        - title
+        - cost
+        - category
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        details:
+          type: string
+        cost:
+          type: number
+          format: float
+          minimum: 0
+        category:
+          type: string
+        manufacturer:
+          type: string
+        itemCode:
+          type: string
+        stockLevel:
+          type: integer
+          minimum: 0
+          default: 0
+        photos:
+          type: array
+          items:
+            type: string
+            format: uri
+        keywords:
+          type: array
+          items:
+            type: string
+
+    ItemsList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+
+    Purchase:
+      type: object
+      required:
+        - id
+        - buyerId
+        - purchasedItems
+        - status
+        - totalCost
+      properties:
+        id:
+          type: string
+          format: uuid
+        buyerId:
+          type: string
+          format: uuid
+        purchasedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseItem'
+        status:
+          $ref: '#/components/schemas/PurchaseStatus'
+        totalCost:
+          type: number
+          format: float
+          minimum: 0
+        deliveryAddress:
+          $ref: '#/components/schemas/Location'
+        paymentAddress:
+          $ref: '#/components/schemas/Location'
+        orderDate:
+          type: string
+          format: date-time
+        lastUpdate:
+          type: string
+          format: date-time
+
+    NewPurchase:
+      type: object
+      required:
+        - purchasedItems
+        - deliveryAddress
+      properties:
+        purchasedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewPurchaseItem'
+          minItems: 1
+        deliveryAddress:
+          $ref: '#/components/schemas/Location'
+        paymentAddress:
+          $ref: '#/components/schemas/Location'
+
+    PurchaseItem:
+      type: object
+      required:
+        - itemId
+        - count
+        - unitCost
+      properties:
+        itemId:
+          type: string
+          format: uuid
+        itemTitle:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+        unitCost:
+          type: number
+          format: float
+          minimum: 0
+        lineTotal:
+          type: number
+          format: float
+          minimum: 0
+
+    NewPurchaseItem:
+      type: object
+      required:
+        - itemId
+        - count
+      properties:
+        itemId:
+          type: string
+          format: uuid
+        count:
+          type: integer
+          minimum: 1
+
+    PurchaseStatus:
+      type: string
+      enum:
+        - pending
+        - confirmed
+        - processing
+        - shipped
+        - delivered
+        - cancelled
+
+    User:
+      type: object
+      required:
+        - id
+        - emailAddress
+        - firstName
+        - lastName
+      properties:
+        id:
+          type: string
+          format: uuid
+        emailAddress:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        registrationDate:
+          type: string
+          format: date-time
+
+    Location:
+      type: object
+      required:
+        - streetAddress
+        - city
+        - region
+        - postalCode
+        - nation
+      properties:
+        streetAddress:
+          type: string
+        city:
+          type: string
+        region:
+          type: string
+        postalCode:
+          type: string
+        nation:
+          type: string
+        isPrimary:
+          type: boolean
+          default: false
+
+    PageInfo:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        totalItems:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0

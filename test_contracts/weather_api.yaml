@@ -1,0 +1,637 @@
+openapi: 3.0.3
+info:
+  title: Weather Forecast API
+  description: Comprehensive weather data and forecasting service API
+  version: 3.2.1
+  contact:
+    name: Weather Service Team
+    email: support@weatherapi.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://api.weather-service.com/v3
+    description: Production weather server
+  - url: https://sandbox.weather-service.com/v3
+    description: Sandbox environment
+
+paths:
+  /current:
+    get:
+      summary: Get current weather
+      description: Retrieve current weather conditions for a specific location
+      operationId: getCurrentWeather
+      tags:
+        - Weather
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          description: Latitude coordinate
+          schema:
+            type: number
+            format: float
+            minimum: -90
+            maximum: 90
+        - name: lon
+          in: query
+          required: true
+          description: Longitude coordinate
+          schema:
+            type: number
+            format: float
+            minimum: -180
+            maximum: 180
+        - name: units
+          in: query
+          required: false
+          description: Unit system for measurements
+          schema:
+            $ref: '#/components/schemas/UnitSystem'
+      responses:
+        '200':
+          description: Current weather data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentWeather'
+        '400':
+          description: Invalid coordinates
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Weather service unavailable
+
+  /forecast:
+    get:
+      summary: Get weather forecast
+      description: Retrieve weather forecast for upcoming days
+      operationId: getWeatherForecast
+      tags:
+        - Weather
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+            minimum: -90
+            maximum: 90
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+            minimum: -180
+            maximum: 180
+        - name: days
+          in: query
+          required: false
+          description: Number of forecast days
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 14
+            default: 5
+        - name: units
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/UnitSystem'
+      responses:
+        '200':
+          description: Weather forecast data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherForecast'
+        '400':
+          description: Invalid parameters
+
+  /historical:
+    get:
+      summary: Get historical weather
+      description: Retrieve historical weather data for a specific date range
+      operationId: getHistoricalWeather
+      tags:
+        - Weather
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: startDate
+          in: query
+          required: true
+          description: Start date for historical data
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          description: End date for historical data
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Historical weather data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricalWeather'
+        '400':
+          description: Invalid date range
+
+  /alerts:
+    get:
+      summary: Get weather alerts
+      description: Retrieve active weather alerts and warnings for a region
+      operationId: getWeatherAlerts
+      tags:
+        - Alerts
+      parameters:
+        - name: region
+          in: query
+          required: true
+          description: Geographic region code
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        - name: severity
+          in: query
+          required: false
+          description: Filter alerts by severity level
+          schema:
+            $ref: '#/components/schemas/AlertSeverity'
+      responses:
+        '200':
+          description: Weather alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeatherAlert'
+        '400':
+          description: Invalid region code
+
+  /radar/{regionId}:
+    get:
+      summary: Get radar data
+      description: Retrieve weather radar imagery for a specific region
+      operationId: getRadarData
+      tags:
+        - Radar
+      parameters:
+        - name: regionId
+          in: path
+          required: true
+          description: Region identifier for radar data
+          schema:
+            type: string
+        - name: layer
+          in: query
+          required: false
+          description: Radar layer type
+          schema:
+            $ref: '#/components/schemas/RadarLayer'
+        - name: timestamp
+          in: query
+          required: false
+          description: Specific timestamp for radar data
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Radar data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RadarData'
+        '404':
+          description: Region not found
+
+  /stations:
+    get:
+      summary: Get weather stations
+      description: Retrieve information about weather monitoring stations
+      operationId: getWeatherStations
+      tags:
+        - Stations
+      parameters:
+        - name: nearLat
+          in: query
+          required: false
+          description: Latitude for proximity search
+          schema:
+            type: number
+            format: float
+        - name: nearLon
+          in: query
+          required: false
+          description: Longitude for proximity search
+          schema:
+            type: number
+            format: float
+        - name: radius
+          in: query
+          required: false
+          description: Search radius in kilometers
+          schema:
+            type: number
+            minimum: 1
+            maximum: 500
+            default: 50
+      responses:
+        '200':
+          description: Weather stations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeatherStation'
+
+components:
+  schemas:
+    UnitSystem:
+      type: string
+      enum:
+        - metric
+        - imperial
+        - kelvin
+      default: metric
+
+    CurrentWeather:
+      type: object
+      required:
+        - location
+        - temperature
+        - humidity
+        - pressure
+        - windSpeed
+        - condition
+        - timestamp
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        temperature:
+          type: number
+          format: float
+          description: Current temperature
+        feelsLike:
+          type: number
+          format: float
+          description: Apparent temperature
+        humidity:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Relative humidity percentage
+        pressure:
+          type: number
+          format: float
+          description: Atmospheric pressure
+        windSpeed:
+          type: number
+          format: float
+          minimum: 0
+          description: Wind speed
+        windDirection:
+          type: integer
+          minimum: 0
+          maximum: 360
+          description: Wind direction in degrees
+        visibility:
+          type: number
+          format: float
+          minimum: 0
+          description: Visibility distance
+        uvIndex:
+          type: number
+          format: float
+          minimum: 0
+          description: UV radiation index
+        condition:
+          $ref: '#/components/schemas/WeatherCondition'
+        timestamp:
+          type: string
+          format: date-time
+        sunrise:
+          type: string
+          format: date-time
+        sunset:
+          type: string
+          format: date-time
+
+    WeatherForecast:
+      type: object
+      required:
+        - location
+        - dailyForecasts
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        dailyForecasts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyForecast'
+        hourlyForecasts:
+          type: array
+          items:
+            $ref: '#/components/schemas/HourlyForecast'
+
+    DailyForecast:
+      type: object
+      required:
+        - date
+        - temperatureHigh
+        - temperatureLow
+        - condition
+      properties:
+        date:
+          type: string
+          format: date
+        temperatureHigh:
+          type: number
+          format: float
+        temperatureLow:
+          type: number
+          format: float
+        condition:
+          $ref: '#/components/schemas/WeatherCondition'
+        precipitationProbability:
+          type: integer
+          minimum: 0
+          maximum: 100
+        precipitationAmount:
+          type: number
+          format: float
+          minimum: 0
+        windSpeed:
+          type: number
+          format: float
+        windDirection:
+          type: integer
+          minimum: 0
+          maximum: 360
+        humidity:
+          type: integer
+          minimum: 0
+          maximum: 100
+
+    HourlyForecast:
+      type: object
+      required:
+        - datetime
+        - temperature
+        - condition
+      properties:
+        datetime:
+          type: string
+          format: date-time
+        temperature:
+          type: number
+          format: float
+        condition:
+          $ref: '#/components/schemas/WeatherCondition'
+        precipitationProbability:
+          type: integer
+          minimum: 0
+          maximum: 100
+        windSpeed:
+          type: number
+          format: float
+
+    HistoricalWeather:
+      type: object
+      required:
+        - location
+        - dateRange
+        - dailyData
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        dateRange:
+          $ref: '#/components/schemas/DateRange'
+        dailyData:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoricalDayData'
+
+    HistoricalDayData:
+      type: object
+      required:
+        - date
+        - temperatureMax
+        - temperatureMin
+        - precipitation
+      properties:
+        date:
+          type: string
+          format: date
+        temperatureMax:
+          type: number
+          format: float
+        temperatureMin:
+          type: number
+          format: float
+        temperatureAvg:
+          type: number
+          format: float
+        precipitation:
+          type: number
+          format: float
+          minimum: 0
+        windSpeedMax:
+          type: number
+          format: float
+        humidity:
+          type: integer
+          minimum: 0
+          maximum: 100
+
+    WeatherAlert:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - severity
+        - startTime
+        - endTime
+        - regions
+      properties:
+        id:
+          type: string
+          description: Alert unique identifier
+        title:
+          type: string
+          description: Alert title
+        description:
+          type: string
+          description: Detailed alert description
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        regions:
+          type: array
+          items:
+            type: string
+          description: Affected regions
+        alertType:
+          type: string
+          description: Type of weather alert
+
+    AlertSeverity:
+      type: string
+      enum:
+        - minor
+        - moderate
+        - severe
+        - extreme
+
+    RadarData:
+      type: object
+      required:
+        - regionId
+        - timestamp
+        - imageUrl
+      properties:
+        regionId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        imageUrl:
+          type: string
+          format: uri
+          description: URL to radar image
+        layer:
+          $ref: '#/components/schemas/RadarLayer'
+        bounds:
+          $ref: '#/components/schemas/GeographicBounds'
+
+    RadarLayer:
+      type: string
+      enum:
+        - precipitation
+        - temperature
+        - wind
+        - satellite
+
+    WeatherStation:
+      type: object
+      required:
+        - id
+        - name
+        - location
+        - active
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        active:
+          type: boolean
+        lastReporting:
+          type: string
+          format: date-time
+        stationType:
+          type: string
+          description: Type of weather station
+
+    WeatherCondition:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: string
+          description: Weather condition code
+        description:
+          type: string
+          description: Human-readable condition
+        icon:
+          type: string
+          description: Weather icon identifier
+
+    Location:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+        city:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
+        timezone:
+          type: string
+
+    DateRange:
+      type: object
+      required:
+        - startDate
+        - endDate
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+
+    GeographicBounds:
+      type: object
+      required:
+        - north
+        - south
+        - east
+        - west
+      properties:
+        north:
+          type: number
+          format: float
+        south:
+          type: number
+          format: float
+        east:
+          type: number
+          format: float
+        west:
+          type: number
+          format: float

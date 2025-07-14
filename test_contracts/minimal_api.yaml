@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Simple Health Check API
+  description: Basic health monitoring and status check API
+  version: 1.0.0
+  contact:
+    name: System Admin
+    email: admin@healthcheck.com
+servers:
+  - url: https://health.service.com/v1
+    description: Health check service
+
+paths:
+  /health:
+    get:
+      summary: Get service health
+      description: Check if the service is running and healthy
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service unavailable
+
+  /status:
+    get:
+      summary: Get detailed status
+      description: Get detailed system status information
+      operationId: getStatus
+      tags:
+        - Status
+      responses:
+        '200':
+          description: System status information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatus'
+
+  /ping:
+    get:
+      summary: Simple ping endpoint
+      description: Basic connectivity test endpoint
+      operationId: ping
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Pong response
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "pong"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: integer
+          description: Service uptime in seconds
+
+    SystemStatus:
+      type: object
+      required:
+        - service
+        - version
+        - timestamp
+      properties:
+        service:
+          type: string
+          description: Service name
+        version:
+          type: string
+          description: Service version
+        timestamp:
+          type: string
+          format: date-time
+        environment:
+          type: string
+          description: Environment name
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+
+    DependencyStatus:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          description: Dependency name
+        status:
+          type: string
+          enum:
+            - available
+            - unavailable
+        lastChecked:
+          type: string
+          format: date-time

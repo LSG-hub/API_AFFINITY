@@ -1,0 +1,79 @@
+[
+  {
+    "test_case": 1,
+    "description": "Very Similar E-commerce APIs (should be 70%+)",
+    "api1": "test_contracts/ecommerce_api.yaml",
+    "api2": "test_contracts/similar_ecommerce_api.yaml",
+    "expected": "HIGH",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between ecommerce_api.yaml and similar_ecommerce_api.yaml...\n\n# True Unified A"
+  },
+  {
+    "test_case": 2,
+    "description": "E-commerce vs Weather APIs (should be 30% or less)",
+    "api1": "test_contracts/ecommerce_api.yaml",
+    "api2": "test_contracts/weather_api.yaml",
+    "expected": "LOW",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between ecommerce_api.yaml and weather_api.yaml...\n\n# True Unified API Affinit"
+  },
+  {
+    "test_case": 3,
+    "description": "Social Media vs Weather APIs (should be 30% or less)",
+    "api1": "test_contracts/social_media_api.yaml",
+    "api2": "test_contracts/weather_api.yaml",
+    "expected": "LOW",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between social_media_api.yaml and weather_api.yaml...\n\n# True Unified API Affi"
+  },
+  {
+    "test_case": 4,
+    "description": "Complex E-commerce vs Simple Health API (should be 30% or less)",
+    "api1": "test_contracts/ecommerce_api.yaml",
+    "api2": "test_contracts/minimal_api.yaml",
+    "expected": "LOW",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between ecommerce_api.yaml and minimal_api.yaml...\n\n# True Unified API Affinit"
+  },
+  {
+    "test_case": 5,
+    "description": "Social Media vs E-commerce APIs (should be 30-70%)",
+    "api1": "test_contracts/social_media_api.yaml",
+    "api2": "test_contracts/ecommerce_api.yaml",
+    "expected": "MEDIUM",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between social_media_api.yaml and ecommerce_api.yaml...\n\n# True Unified API Af"
+  },
+  {
+    "test_case": 6,
+    "description": "Weather vs Simple Health API (should be 30-70%)",
+    "api1": "test_contracts/weather_api.yaml",
+    "api2": "test_contracts/minimal_api.yaml",
+    "expected": "MEDIUM",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between weather_api.yaml and minimal_api.yaml...\n\n# True Unified API Affinity "
+  },
+  {
+    "test_case": 7,
+    "description": "Identical APIs (should be ~100%)",
+    "api1": "test_contracts/minimal_api.yaml",
+    "api2": "test_contracts/minimal_api.yaml",
+    "expected": "IDENTICAL",
+    "overall_score": null,
+    "component_scores": {},
+    "result": "\u274c ERROR",
+    "output_sample": "\ud83d\ude80 Initializing True Unified Affinity Analyzer...\n\u2713 Loaded semantic embedding model: all-MiniLM-L6-v2\nAnalyzing similarity between minimal_api.yaml and minimal_api.yaml...\n\n# True Unified API Affinity "
+  }
+]
